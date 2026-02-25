@@ -35,7 +35,7 @@
             --orange: #f59e0b;
             --red: #ef4444;
             --purple: #8b5cf6;
-            --accent-cyan: #2563eb; /* for light mode, use blue as accent */
+            --accent-cyan: #2563eb;
             --badge-blue-bg: #dbeafe;
             --badge-blue-text: #1e40af;
             --badge-green-bg: #d1fae5;
@@ -249,16 +249,6 @@
         }
         .header-left h1 { font-size: 1.7rem; font-weight: 600; color: var(--text-primary); }
         .header-left .sub { font-size: 0.85rem; color: var(--text-secondary); margin-top: 2px; }
-        .header-left .system-badge {
-            background: var(--accent-cyan);
-            color: var(--bg-body);
-            font-size: 0.7rem;
-            font-weight: 600;
-            padding: 2px 8px;
-            border-radius: 20px;
-            margin-left: 8px;
-            text-transform: uppercase;
-        }
         .header-right {
             display: flex;
             align-items: center;
@@ -413,24 +403,19 @@
             box-shadow: 0 0 10px var(--accent-cyan);
         }
 
-        .row-split {
-            display: flex;
-            gap: 24px;
-            margin-bottom: 28px;
-        }
+        /* chart card - now full width above table */
         .chart-card {
             background: var(--card-bg);
             border-radius: 16px;
             padding: 20px;
             box-shadow: var(--shadow);
-            width: 30%;
+            margin-bottom: 24px;
         }
         .table-card {
             background: var(--card-bg);
             border-radius: 16px;
             padding: 20px;
             box-shadow: var(--shadow);
-            width: 70%;
             overflow-x: auto;
         }
         table { width: 100%; border-collapse: collapse; }
@@ -578,14 +563,6 @@
         }
         @keyframes loading { 0%{ background-position: 200% 0; } 100%{ background-position: -200% 0; } }
 
-        .toast-demo {
-            display: flex;
-            gap: 16px;
-            margin: 20px 0;
-        }
-        .toast-success { background: var(--green); color: white; padding: 12px 24px; border-radius: 40px; }
-        .toast-error { background: var(--red); color: white; padding: 12px 24px; border-radius: 40px; }
-
         .lemari-selector {
             display: flex;
             gap: 20px;
@@ -630,6 +607,48 @@
             max-width: 90%;
             margin: auto;
         }
+
+        /* Pagination styles */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 20px;
+        }
+        .pagination button {
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-light);
+            background: var(--card-bg);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .pagination button:hover:not(:disabled) {
+            background: var(--accent-cyan);
+            color: var(--bg-body);
+            border-color: var(--accent-cyan);
+        }
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .pagination .active-page {
+            background: var(--accent-cyan);
+            color: var(--bg-body);
+            border-color: var(--accent-cyan);
+        }
+
+        /* Kredit TSUP */
+        .footer-credit {
+            text-align: right;
+            margin-top: 20px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border-light);
+            padding-top: 10px;
+        }
     </style>
 </head>
 <body class="">
@@ -656,7 +675,7 @@
             <div class="header-left">
                 <div class="hamburger" onclick="toggleSidebar()">☰</div>
                 <div>
-                    <h1>Punch & Dies Management System <span class="system-badge">Sistem</span></h1>
+                    <h1>Punch & Dies Management System</h1>
                     <span class="sub">Industrial Inventory Control v2.0</span>
                 </div>
             </div>
@@ -713,31 +732,37 @@
                 <div class="progress-item"><div class="progress-header"><span>Lemari 5</span><span>67%</span></div><div class="progress-bar-bg"><div class="progress-fill" style="width:67%"></div></div></div>
             </div>
 
-            <div class="row-split">
-                <div class="chart-card">
-                    <h4>Distribusi Status Inventaris</h4>
-                    <canvas id="donutChart" width="200" height="200"></canvas>
-                    <div style="display:flex; gap:12px; margin-top:16px; flex-wrap:wrap;">
-                        <span><span style="color:#2563eb;">●</span> Digunakan <span id="chart-digunakan">45</span>%</span>
-                        <span><span style="color:#10b981;">●</span> Baik <span id="chart-baik">35</span>%</span>
-                        <span><span style="color:#f59e0b;">●</span> Dipoles <span id="chart-dipoles">15</span>%</span>
-                        <span><span style="color:#ef4444;">●</span> Musnahkan <span id="chart-musnahkan">5</span>%</span>
-                    </div>
-                </div>
-                <div class="table-card">
-                    <h4 style="margin-bottom:16px;">Tabel Inventaris</h4>
-                    <table>
-                        <thead><tr><th>Lemari</th><th>Laci</th><th>Produk</th><th>P.Atas</th><th>P.Bawah</th><th>Dies</th><th>Status</th><th>Digunakan Oleh</th><th></th></tr></thead>
-                        <tbody id="dashboard-table-body"></tbody>
-                    </table>
+            <!-- Chart card placed above table -->
+            <div class="chart-card">
+                <h4>Distribusi Status Inventaris</h4>
+                <canvas id="donutChart" width="200" height="200"></canvas>
+                <div style="display:flex; gap:12px; margin-top:16px; flex-wrap:wrap;">
+                    <span><span style="color:#2563eb;">●</span> Digunakan <span id="chart-digunakan">45</span>%</span>
+                    <span><span style="color:#10b981;">●</span> Baik <span id="chart-baik">35</span>%</span>
+                    <span><span style="color:#f59e0b;">●</span> Dipoles <span id="chart-dipoles">15</span>%</span>
+                    <span><span style="color:#ef4444;">●</span> Musnahkan <span id="chart-musnahkan">5</span>%</span>
                 </div>
             </div>
+
+            <div class="table-card">
+                <h4 style="margin-bottom:16px;">Tabel Inventaris</h4>
+                <table>
+                    <thead><tr><th>Lemari</th><th>Laci</th><th>Produk</th><th>P.Atas</th><th>P.Bawah</th><th>Dies</th><th>Status</th><th>Digunakan Oleh</th><th></th></tr></thead>
+                    <tbody id="dashboard-table-body"></tbody>
+                </table>
+                <!-- Pagination Controls -->
+                <div class="pagination" id="pagination-controls">
+                    <!-- akan diisi oleh JavaScript -->
+                </div>
+            </div>
+
             <div id="emptyState" style="background:var(--card-bg); border-radius:16px; padding:30px; text-align:center; margin-top:10px; color:var(--text-secondary); display: none;">
                 <i class="fas fa-box-open" style="font-size:2rem;"></i> <span>Hasil filter tidak ditemukan</span>
             </div>
-            <div class="toast-demo">
-                <div class="toast-success"><i class="fas fa-check-circle"></i> Berhasil disimpan</div>
-                <div class="toast-error"><i class="fas fa-times-circle"></i> Gagal, coba lagi</div>
+
+            <!-- Tambahan kredit TSUP -->
+            <div class="footer-credit">
+                by TSUP
             </div>
         </div>
 
@@ -747,18 +772,18 @@
             <div id="allCabinetsContainer"></div>
         </div>
 
-        <!-- LACI EDITOR -->
+        <!-- LACI EDITOR (role dropdown dihapus, opsi lemari disederhanakan) -->
         <div id="laciEditor" class="page">
             <div class="lemari-selector" style="justify-content: space-between; flex-wrap: wrap;">
                 <div style="display: flex; gap: 20px; flex-wrap: wrap;">
                     <div class="selector-item">
                         <label for="lemariSelect">Pilih Lemari</label>
                         <select id="lemariSelect" onchange="populateLaciDropdown(this.value)">
-                            <option value="1">Lemari 1 (4x4)</option>
-                            <option value="2">Lemari 2 (4x4)</option>
-                            <option value="3">Lemari 3 (4x4)</option>
-                            <option value="4">Lemari 4 (4x4)</option>
-                            <option value="5">Lemari 5 (4x2)</option>
+                            <option value="1">Lemari 1</option>
+                            <option value="2">Lemari 2</option>
+                            <option value="3">Lemari 3</option>
+                            <option value="4">Lemari 4</option>
+                            <option value="5">Lemari 5</option>
                         </select>
                     </div>
                     <div class="selector-item">
@@ -766,19 +791,11 @@
                         <select id="laciSelect" onchange="updateEditTitle(); loadLaciData();"></select>
                     </div>
                 </div>
-                <div class="selector-item">
-                    <label for="roleSelect">Role</label>
-                    <select id="roleSelect" onchange="updateRole()">
-                        <option value="Admin">Admin</option>
-                        <option value="TSUP">TSUP</option>
-                        <option value="Operator" selected>Operator</option>
-                        <option value="Viewer">Viewer</option>
-                    </select>
-                </div>
+                <!-- Role selector dihapus -->
             </div>
 
             <div class="modal-sample" id="editModal">
-                <div class="modal-title" id="editModalTitle">Edit Laci (1A) <span class="badge badge-blue" style="margin-left:12px;">Operator view</span></div>
+                <div class="modal-title" id="editModalTitle">Edit Laci (1A) <span class="badge badge-blue" style="margin-left:12px;">Admin view</span></div>
                 <div class="form-grid">
                     <div class="field"><label>Punch Atas</label><input type="number" id="punchAtas" value="12" disabled class="disabled-field"><i class="fas fa-lock lock-icon"></i></div>
                     <div class="field"><label>Punch Bawah</label><input type="number" id="punchBawah" value="12" disabled class="disabled-field"><i class="fas fa-lock lock-icon"></i></div>
@@ -945,6 +962,57 @@
         }
     }
 
+    // ==================== PAGINATION ====================
+    let currentPage = 1;
+    const rowsPerPage = 20;
+    let currentData = []; // data yang sedang ditampilkan (hasil filter)
+
+    function renderPagination(totalRows) {
+        const totalPages = Math.ceil(totalRows / rowsPerPage);
+        const paginationDiv = document.getElementById('pagination-controls');
+        if (!paginationDiv) return;
+        
+        if (totalPages <= 1) {
+            paginationDiv.innerHTML = '';
+            return;
+        }
+
+        let html = '';
+        // Previous button
+        html += `<button onclick="changePage(-1)" ${currentPage === 1 ? 'disabled' : ''}>Prev</button>`;
+
+        // Page numbers
+        for (let i = 1; i <= totalPages; i++) {
+            if (i === currentPage) {
+                html += `<button class="active-page" onclick="goToPage(${i})">${i}</button>`;
+            } else {
+                html += `<button onclick="goToPage(${i})">${i}</button>`;
+            }
+        }
+
+        // Next button
+        html += `<button onclick="changePage(1)" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>`;
+
+        paginationDiv.innerHTML = html;
+    }
+
+    function changePage(delta) {
+        const totalPages = Math.ceil(currentData.length / rowsPerPage);
+        const newPage = currentPage + delta;
+        if (newPage >= 1 && newPage <= totalPages) {
+            currentPage = newPage;
+            renderTable(currentData);
+        }
+    }
+
+    function goToPage(page) {
+        const totalPages = Math.ceil(currentData.length / rowsPerPage);
+        if (page >= 1 && page <= totalPages) {
+            currentPage = page;
+            renderTable(currentData);
+        }
+    }
+
     // ==================== DASHBOARD FILTER ====================
     function populateFilterDropdowns() {
         const lemariSelect = document.getElementById('filterLemari');
@@ -955,7 +1023,6 @@
             option.textContent = `Lemari ${i}`;
             lemariSelect.appendChild(option);
         }
-        // Inisialisasi dropdown laci berdasarkan pilihan lemari awal (all)
         updateLaciDropdown();
     }
 
@@ -964,27 +1031,21 @@
         const laciSelect = document.getElementById('filterLaci');
         const selectedLemari = lemariSelect.value;
 
-        // Hapus semua opsi laci
         laciSelect.innerHTML = '';
 
         if (selectedLemari === 'all') {
-            // Jika semua lemari, hanya tampilkan opsi "Semua Laci"
             const option = document.createElement('option');
             option.value = 'all';
             option.textContent = 'Semua Laci';
             laciSelect.appendChild(option);
         } else {
-            // Filter data berdasarkan lemari yang dipilih
             const lemariId = parseInt(selectedLemari);
             const filteredData = masterLaciData.filter(item => item.lemariId === lemariId);
-            // Ambil label unik
             const labels = [...new Set(filteredData.map(item => item.label))].sort();
-            // Tambahkan opsi "Semua Laci" di awal
             const allOption = document.createElement('option');
             allOption.value = 'all';
             allOption.textContent = 'Semua Laci';
             laciSelect.appendChild(allOption);
-            // Tambahkan opsi laci
             labels.forEach(label => {
                 const option = document.createElement('option');
                 option.value = label;
@@ -1041,15 +1102,23 @@
     }
 
     function renderTable(data) {
+        currentData = data; // simpan untuk pagination
+        const totalRows = data.length;
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = Math.min(start + rowsPerPage, totalRows);
+        const pageData = data.slice(start, end);
+
         const tbody = document.getElementById('dashboard-table-body');
         if (data.length === 0) {
             document.getElementById('emptyState').style.display = 'block';
             tbody.innerHTML = '';
+            renderPagination(0);
             return;
         }
         document.getElementById('emptyState').style.display = 'none';
+
         let html = '';
-        data.forEach(item => {
+        pageData.forEach(item => {
             let badgeClass = '';
             if (item.status === 'Sedang dipakai') badgeClass = 'badge-blue';
             else if (item.status === 'Kondisi baik') badgeClass = 'badge-green';
@@ -1058,9 +1127,11 @@
             html += `<tr><td>${item.lemariId}</td><td>${item.label}</td><td>${item.product}</td><td>${item.punchAtas}</td><td>${item.punchBawah}</td><td>${item.dies}</td><td><span class="badge ${badgeClass}">${item.status}</span></td><td>${item.user}</td><td><i class="fas fa-edit edit-icon" onclick="openEditModal('${item.label}')"></i></td></tr>`;
         });
         tbody.innerHTML = html;
+        renderPagination(totalRows);
     }
 
     function applyFilter() {
+        currentPage = 1; // reset ke halaman 1
         const lemari = document.getElementById('filterLemari').value;
         const laci = document.getElementById('filterLaci').value;
         const produk = document.getElementById('filterProduk').value;
@@ -1070,9 +1141,10 @@
     }
 
     function resetFilter() {
+        currentPage = 1;
         document.getElementById('filterLemari').value = 'all';
         document.getElementById('filterProduk').value = '';
-        updateLaciDropdown(); // reset laci dropdown ke "Semua Laci"
+        updateLaciDropdown();
         updateStats(masterLaciData);
         renderTable(masterLaciData);
     }
@@ -1108,7 +1180,7 @@
     }
 
     // ==================== LACI EDITOR ====================
-    let currentRole = 'Operator';
+    let currentRole = 'Admin'; // default role, nanti diganti sesuai user login
 
     function populateLaciDropdown(lemariId) {
         const laciData = masterLaciData.filter(l => l.lemariId == lemariId);
@@ -1134,6 +1206,9 @@
             document.getElementById('dies').value = selectedLaci.dies;
             document.getElementById('produk').value = selectedLaci.product;
             const statusSelect = document.getElementById('statusSelect');
+            // Set status options dulu
+            updateStatusOptions(); // ini akan mengisi dropdown status
+            // Lalu set nilai status
             if (statusSelect.querySelector(`option[value="${selectedLaci.status}"]`)) {
                 statusSelect.value = selectedLaci.status;
             } else {
@@ -1153,9 +1228,6 @@
     }
 
     function updateStatusOptions() {
-        const roleSelect = document.getElementById('roleSelect');
-        if (!roleSelect) return;
-        currentRole = roleSelect.value;
         const statusSelect = document.getElementById('statusSelect');
         let options = [];
         if (currentRole === 'Operator') {
@@ -1195,11 +1267,6 @@
             inisialInput.value = '';
             inisialField.classList.add('tooltip');
         }
-    }
-
-    function updateRole() {
-        updateStatusOptions();
-        loadLaciData();
     }
 
     function resetEdit() {
@@ -1469,7 +1536,8 @@
         if (pageId === 'laciEditor') {
             document.querySelector('[data-page="laciEditor"]').classList.add('active');
             populateLaciDropdown(1);
-            updateRole();
+            // Panggil updateStatusOptions untuk mengisi dropdown status sesuai role
+            updateStatusOptions();
         }
         if (pageId === 'settings') {
             document.querySelector('[data-page="settings"]').classList.add('active');
