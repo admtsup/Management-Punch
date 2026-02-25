@@ -403,13 +403,18 @@
             box-shadow: 0 0 10px var(--accent-cyan);
         }
 
-        /* chart card - now full width above table */
+        /* chart card - now with two columns */
         .chart-card {
             background: var(--card-bg);
             border-radius: 16px;
             padding: 20px;
             box-shadow: var(--shadow);
             margin-bottom: 24px;
+        }
+        .chart-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
         }
         .table-card {
             background: var(--card-bg);
@@ -732,15 +737,23 @@
                 <div class="progress-item"><div class="progress-header"><span>Lemari 5</span><span>67%</span></div><div class="progress-bar-bg"><div class="progress-fill" style="width:67%"></div></div></div>
             </div>
 
-            <!-- Chart card placed above table -->
+            <!-- Chart card with two columns -->
             <div class="chart-card">
-                <h4>Distribusi Status Inventaris</h4>
-                <canvas id="donutChart" width="200" height="200"></canvas>
-                <div style="display:flex; gap:12px; margin-top:16px; flex-wrap:wrap;">
-                    <span><span style="color:#2563eb;">●</span> Digunakan <span id="chart-digunakan">45</span>%</span>
-                    <span><span style="color:#10b981;">●</span> Baik <span id="chart-baik">35</span>%</span>
-                    <span><span style="color:#f59e0b;">●</span> Dipoles <span id="chart-dipoles">15</span>%</span>
-                    <span><span style="color:#ef4444;">●</span> Musnahkan <span id="chart-musnahkan">5</span>%</span>
+                <div class="chart-container">
+                    <div>
+                        <h4>Distribusi Status Inventaris</h4>
+                        <canvas id="donutChart" width="200" height="200"></canvas>
+                        <div style="display:flex; gap:12px; margin-top:16px; flex-wrap:wrap;">
+                            <span><span style="color:#2563eb;">●</span> Digunakan <span id="chart-digunakan">45</span>%</span>
+                            <span><span style="color:#10b981;">●</span> Baik <span id="chart-baik">35</span>%</span>
+                            <span><span style="color:#f59e0b;">●</span> Dipoles <span id="chart-dipoles">15</span>%</span>
+                            <span><span style="color:#ef4444;">●</span> Musnahkan <span id="chart-musnahkan">5</span>%</span>
+                        </div>
+                    </div>
+                    <div>
+                        <h4>Total Punch & Dies per Lemari</h4>
+                        <canvas id="barChart" width="200" height="200"></canvas>
+                    </div>
                 </div>
             </div>
 
@@ -1147,6 +1160,55 @@
         updateLaciDropdown();
         updateStats(masterLaciData);
         renderTable(masterLaciData);
+    }
+
+    // ==================== BAR CHART (total per lemari dari seluruh data) ====================
+    let barChart;
+
+    function initBarChart() {
+        const ctx = document.getElementById('barChart')?.getContext('2d');
+        if (!ctx) return;
+        barChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Lemari 1', 'Lemari 2', 'Lemari 3', 'Lemari 4', 'Lemari 5'],
+                datasets: [
+                    { label: 'Punch Atas', data: [0,0,0,0,0], backgroundColor: '#2563eb' },
+                    { label: 'Punch Bawah', data: [0,0,0,0,0], backgroundColor: '#10b981' },
+                    { label: 'Dies', data: [0,0,0,0,0], backgroundColor: '#f59e0b' }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'top' } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+    }
+
+    function updateBarChart() {
+        if (!barChart) return;
+        // Hitung total per lemari dari masterLaciData
+        let totals = {
+            1: { punchAtas: 0, punchBawah: 0, dies: 0 },
+            2: { punchAtas: 0, punchBawah: 0, dies: 0 },
+            3: { punchAtas: 0, punchBawah: 0, dies: 0 },
+            4: { punchAtas: 0, punchBawah: 0, dies: 0 },
+            5: { punchAtas: 0, punchBawah: 0, dies: 0 }
+        };
+        masterLaciData.forEach(item => {
+            let id = item.lemariId;
+            if (totals[id]) {
+                totals[id].punchAtas += item.punchAtas;
+                totals[id].punchBawah += item.punchBawah;
+                totals[id].dies += item.dies;
+            }
+        });
+        barChart.data.datasets[0].data = [totals[1].punchAtas, totals[2].punchAtas, totals[3].punchAtas, totals[4].punchAtas, totals[5].punchAtas];
+        barChart.data.datasets[1].data = [totals[1].punchBawah, totals[2].punchBawah, totals[3].punchBawah, totals[4].punchBawah, totals[5].punchBawah];
+        barChart.data.datasets[2].data = [totals[1].dies, totals[2].dies, totals[3].dies, totals[4].dies, totals[5].dies];
+        barChart.update();
     }
 
     // ==================== MANAGER PAGE ====================
@@ -1585,6 +1647,8 @@
         loadUsers();
         loadActivityLog();
         loadLogo();
+        initBarChart();
+        updateBarChart(); // hitung total dari master
 
         const ctx = document.getElementById('donutChart')?.getContext('2d');
         if (ctx) {
