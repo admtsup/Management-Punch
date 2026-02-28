@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,7 +19,6 @@
             font-family: 'Space Grotesk', sans-serif;
         }
 
-        /* Light theme (default) */
         :root {
             --bg-body: #f5f7fb;
             --sidebar-bg: #ffffff;
@@ -47,7 +47,6 @@
             --badge-red-text: #b91c1c;
         }
 
-        /* Dark theme */
         body.dark {
             --bg-body: #0f172a;
             --sidebar-bg: #1e293b;
@@ -81,6 +80,79 @@
             color: var(--text-primary);
             transition: background-color 0.2s, color 0.2s;
             min-height: 100vh;
+        }
+
+        /* Login Modal */
+        .login-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            backdrop-filter: blur(4px);
+        }
+        .login-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 32px;
+            width: 360px;
+            max-width: 90%;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-light);
+        }
+        .login-card h2 {
+            margin-bottom: 24px;
+            color: var(--accent-cyan);
+            text-align: center;
+        }
+        .login-card .field {
+            margin-bottom: 16px;
+        }
+        .login-card label {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        .login-card input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border-light);
+            background: var(--bg-body);
+            color: var(--text-primary);
+        }
+        .login-card input:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 2px rgba(0,255,255,0.2);
+        }
+        .login-card .btn-blue {
+            width: 100%;
+            margin-top: 8px;
+        }
+        .login-card .demo-accounts {
+            margin-top: 20px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            background: var(--hover-bg);
+            padding: 12px;
+            border-radius: 10px;
+        }
+        .login-card .demo-accounts p {
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+        .login-card .demo-accounts ul {
+            list-style: none;
+        }
+        .login-card .demo-accounts li {
+            margin-bottom: 4px;
         }
 
         .app {
@@ -439,7 +511,7 @@
         /* Tinggi khusus untuk bar chart horizontal - dibuat lebih ramping */
         .chart-container #barChart {
             width: 100%;
-            height: 130px; /* lebih ramping */
+            height: 130px;
         }
         .table-card {
             background: var(--card-bg);
@@ -679,10 +751,39 @@
             border-top: 1px solid var(--border-light);
             padding-top: 10px;
         }
+
+        /* Sembunyikan menu settings jika bukan admin */
+        .nav-item[data-page="settings"].hidden {
+            display: none;
+        }
     </style>
 </head>
-<body class="">
-<div class="app">
+<body>
+    <!-- Login Modal -->
+    <div id="loginModal" class="login-modal">
+        <div class="login-card">
+            <h2>PDMS Login</h2>
+            <div class="field">
+                <label>Email</label>
+                <input type="email" id="loginEmail" placeholder="admin@pdms.com / tsup@pdms.com / op@pdms.com">
+            </div>
+            <div class="field">
+                <label>Password</label>
+                <input type="password" id="loginPassword" placeholder="••••••">
+            </div>
+            <button class="btn-blue" onclick="handleLogin()">Login</button>
+            <div class="demo-accounts">
+                <p>Akun Demo:</p>
+                <ul>
+                    <li><strong>Admin:</strong> admin@pdms.com / admin123</li>
+                    <li><strong>TSUP:</strong> tsup@pdms.com / tsup123</li>
+                    <li><strong>Operator:</strong> op@pdms.com / op123</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+<div class="app" id="app">
     <!-- SIDEBAR -->
     <aside class="sidebar" id="sidebar">
         <div class="logo-area">
@@ -696,7 +797,7 @@
             <div class="nav-item" data-page="settings" title="Settings"><i class="fas fa-sliders-h"></i> <span>Settings</span> <span class="badge-admin">Admin</span></div>
             <div class="nav-item" data-page="profile" title="Profile"><i class="fas fa-user"></i> <span>Profile</span></div>
         </nav>
-        <div class="logout" title="Logout"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></div>
+        <div class="logout" title="Logout" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></div>
     </aside>
 
     <main class="main">
@@ -713,9 +814,9 @@
                 <div class="mode-toggle" id="darkToggle">
                     <div class="toggle-icon"><i class="fas fa-moon"></i></div>
                 </div>
-                <div class="user-profile">
-                    <span class="avatar">JD</span>
-                    <span class="role-badge">Admin</span>
+                <div class="user-profile" id="userProfile">
+                    <span class="avatar" id="avatarInitials">JD</span>
+                    <span class="role-badge" id="roleBadge">Admin</span>
                 </div>
             </div>
         </header>
@@ -762,7 +863,7 @@
                 <div class="progress-item"><div class="progress-header"><span>Lemari 5</span><span>67%</span></div><div class="progress-bar-bg"><div class="progress-fill" style="width:67%"></div></div></div>
             </div>
 
-            <!-- Chart card with two columns - perbaikan: bar chart horizontal grouped dengan ukuran ramping -->
+            <!-- Chart card with two columns -->
             <div class="chart-card">
                 <div class="chart-container">
                     <div>
@@ -788,7 +889,6 @@
                     <thead><tr><th>Lemari</th><th>Laci</th><th>Produk</th><th>P.Atas</th><th>P.Bawah</th><th>Dies</th><th>Status</th><th>Digunakan Oleh</th><th></th></tr></thead>
                     <tbody id="dashboard-table-body"></tbody>
                 </table>
-                <!-- Pagination Controls -->
                 <div class="pagination" id="pagination-controls"></div>
             </div>
 
@@ -796,7 +896,6 @@
                 <i class="fas fa-box-open" style="font-size:2rem;"></i> <span>Hasil filter tidak ditemukan</span>
             </div>
 
-            <!-- Tambahan kredit TSUP -->
             <div class="footer-credit">
                 by TSUP
             </div>
@@ -960,6 +1059,75 @@
 <script>
     // Registrasi plugin datalabels
     Chart.register(ChartDataLabels);
+
+    // Data user demo (menggunakan email)
+    const demoUsers = [
+        { email: 'admin@pdms.com', password: 'admin123', name: 'Admin', role: 'Admin' },
+        { email: 'tsup@pdms.com', password: 'tsup123', name: 'Supri', role: 'TSUP' },
+        { email: 'op@pdms.com', password: 'op123', name: 'Operator', role: 'Operator' }
+    ];
+
+    // Cek session login
+    let currentUser = null;
+
+    function checkLogin() {
+        const stored = localStorage.getItem('pdms_current_user');
+        if (stored) {
+            currentUser = JSON.parse(stored);
+            // Pastikan user ada di demoUsers (valid)
+            const found = demoUsers.find(u => u.email === currentUser.email);
+            if (found) {
+                updateUIForUser();
+                document.getElementById('loginModal').style.display = 'none';
+                return;
+            }
+        }
+        // Tampilkan modal login
+        document.getElementById('loginModal').style.display = 'flex';
+    }
+
+    function handleLogin() {
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value.trim();
+        const user = demoUsers.find(u => u.email === email && u.password === password);
+        if (user) {
+            currentUser = { ...user }; // simpan tanpa password
+            delete currentUser.password;
+            localStorage.setItem('pdms_current_user', JSON.stringify(currentUser));
+            updateUIForUser();
+            document.getElementById('loginModal').style.display = 'none';
+        } else {
+            alert('Email atau password salah!');
+        }
+    }
+
+    function handleLogout() {
+        localStorage.removeItem('pdms_current_user');
+        currentUser = null;
+        document.getElementById('loginModal').style.display = 'flex';
+        // Reset tampilan
+        window.location.reload(); 
+    }
+
+    function updateUIForUser() {
+        // Update profile di header
+        document.getElementById('avatarInitials').textContent = currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase() || currentUser.name.substring(0,2).toUpperCase();
+        document.getElementById('roleBadge').textContent = currentUser.role;
+        document.getElementById('profileRole').textContent = currentUser.role;
+        document.getElementById('profileName').value = currentUser.name;
+        document.getElementById('profileEmail').value = currentUser.email;
+
+        // Atur visibilitas menu Settings (hanya Admin)
+        const settingsNav = document.querySelector('.nav-item[data-page="settings"]');
+        if (currentUser.role !== 'Admin') {
+            settingsNav.classList.add('hidden');
+        } else {
+            settingsNav.classList.remove('hidden');
+        }
+
+        // Atur currentRole untuk Laci Editor
+        currentRole = currentUser.role;
+    }
 
     // ==================== DATA MASTER ====================
     let masterLaciData = [];
@@ -1183,7 +1351,7 @@
         updateBarChart();
     }
 
-    // ==================== HORIZONTAL GROUPED BAR CHART (RAMPING) ====================
+    // ==================== HORIZONTAL GROUPED BAR CHART ====================
     let barChart;
 
     function initBarChart() {
@@ -1294,7 +1462,7 @@
     }
 
     // ==================== LACI EDITOR ====================
-    let currentRole = 'Admin';
+    let currentRole = 'Admin'; // akan diupdate saat login
 
     function populateLaciDropdown(lemariId) {
         const laciData = masterLaciData.filter(l => l.lemariId == lemariId);
@@ -1418,7 +1586,7 @@
     }
 
     function addActivityLog(action, target, details) {
-        const user = JSON.parse(localStorage.getItem('pdms_current_user') || '{"name":"Admin"}').name;
+        const user = currentUser ? currentUser.name : 'Admin';
         activityLog.push({
             timestamp: new Date().toLocaleString(),
             user: user,
@@ -1536,18 +1704,12 @@
     });
 
     // ==================== PROFILE ====================
-    let currentUser = { name: 'John Doe', email: 'john.doe@pdms.com', role: 'Admin', password: 'admin123' };
-
     function loadProfile() {
-        const stored = localStorage.getItem('pdms_current_user');
-        if (stored) {
-            currentUser = JSON.parse(stored);
-        } else {
-            localStorage.setItem('pdms_current_user', JSON.stringify(currentUser));
+        if (currentUser) {
+            document.getElementById('profileName').value = currentUser.name;
+            document.getElementById('profileEmail').value = currentUser.email;
+            document.getElementById('profileRole').textContent = currentUser.role;
         }
-        document.getElementById('profileName').value = currentUser.name;
-        document.getElementById('profileEmail').value = currentUser.email;
-        document.getElementById('profileRole').textContent = currentUser.role;
         const storedPhoto = localStorage.getItem('pdms_profile_photo');
         if (storedPhoto) {
             document.getElementById('profileAvatar').innerHTML = `<img src="${storedPhoto}" style="width:80px; height:80px; border-radius:50%; object-fit:cover;"><button class="btn-gray" style="position: absolute; bottom: 0; right: 0;" onclick="document.getElementById('profilePhotoUpload').click()"><i class="fas fa-camera"></i></button>`;
@@ -1555,36 +1717,18 @@
     }
 
     function saveProfile() {
+        if (!currentUser) return;
         currentUser.name = document.getElementById('profileName').value;
         currentUser.email = document.getElementById('profileEmail').value;
         localStorage.setItem('pdms_current_user', JSON.stringify(currentUser));
         alert('Profil disimpan');
         addActivityLog('Edit Profil', currentUser.email, 'Profil diubah');
+        // Update header
+        document.getElementById('avatarInitials').textContent = currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase() || currentUser.name.substring(0,2).toUpperCase();
     }
 
     function changePassword() {
-        const old = document.getElementById('oldPassword').value;
-        const newp = document.getElementById('newPassword').value;
-        const confirm = document.getElementById('confirmPassword').value;
-        if (old !== currentUser.password) {
-            alert('Password lama salah');
-            return;
-        }
-        if (newp !== confirm) {
-            alert('Konfirmasi password tidak cocok');
-            return;
-        }
-        if (newp.length < 6) {
-            alert('Password minimal 6 karakter');
-            return;
-        }
-        currentUser.password = newp;
-        localStorage.setItem('pdms_current_user', JSON.stringify(currentUser));
-        alert('Password berhasil diubah');
-        document.getElementById('oldPassword').value = '';
-        document.getElementById('newPassword').value = '';
-        document.getElementById('confirmPassword').value = '';
-        addActivityLog('Ubah Password', currentUser.email, 'Password diubah');
+        alert('Fungsi ganti password tidak diimplementasikan di demo.');
     }
 
     function handleProfilePhotoUpload(event) {
@@ -1691,7 +1835,6 @@
     window.onload = function() {
         generateMasterData();
         populateFilterDropdowns();
-        resetFilter();
         loadUsers();
         loadActivityLog();
         loadLogo();
@@ -1712,6 +1855,9 @@
                 options: { cutout: '70%', plugins: { legend: { display: false }, datalabels: { display: false } } }
             });
         }
+
+        // Cek login
+        checkLogin();
     };
 
     document.querySelectorAll('.nav-item').forEach(item => {
@@ -1734,3 +1880,4 @@
 </script>
 </body>
 </html>
+```
