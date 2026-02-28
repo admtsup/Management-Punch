@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,6 +11,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <style>
+        /* ... semua style yang sudah ada, ditambah style untuk modal login ... */
         * {
             margin: 0;
             padding: 0;
@@ -764,8 +764,8 @@
         <div class="login-card">
             <h2>PDMS Login</h2>
             <div class="field">
-                <label>Email</label>
-                <input type="email" id="loginEmail" placeholder="admin@pdms.com / tsup@pdms.com / op@pdms.com">
+                <label>Username</label>
+                <input type="text" id="loginUsername" placeholder="admin / tsup / op">
             </div>
             <div class="field">
                 <label>Password</label>
@@ -775,9 +775,9 @@
             <div class="demo-accounts">
                 <p>Akun Demo:</p>
                 <ul>
-                    <li><strong>Admin:</strong> admin@pdms.com / admin123</li>
-                    <li><strong>TSUP:</strong> tsup@pdms.com / tsup123</li>
-                    <li><strong>Operator:</strong> op@pdms.com / op123</li>
+                    <li><strong>Admin:</strong> admin / admin123</li>
+                    <li><strong>TSUP:</strong> tsup / tsup123</li>
+                    <li><strong>Operator:</strong> op / op123</li>
                 </ul>
             </div>
         </div>
@@ -821,7 +821,7 @@
             </div>
         </header>
 
-        <!-- PAGES -->
+        <!-- PAGES (sama seperti sebelumnya) -->
         <div id="dashboard" class="page active-page">
             <div class="filter-panel">
                 <div class="filter-item">
@@ -1060,11 +1060,11 @@
     // Registrasi plugin datalabels
     Chart.register(ChartDataLabels);
 
-    // Data user demo (menggunakan email)
+    // Data user demo
     const demoUsers = [
-        { email: 'admin@pdms.com', password: 'admin123', name: 'Admin', role: 'Admin' },
-        { email: 'tsup@pdms.com', password: 'tsup123', name: 'Supri', role: 'TSUP' },
-        { email: 'op@pdms.com', password: 'op123', name: 'Operator', role: 'Operator' }
+        { username: 'admin', password: 'admin123', name: 'Admin', email: 'admin@pdms.com', role: 'Admin' },
+        { username: 'tsup', password: 'tsup123', name: 'Supri', email: 'tsup@pdms.com', role: 'TSUP' },
+        { username: 'op', password: 'op123', name: 'Operator', email: 'op@pdms.com', role: 'Operator' }
     ];
 
     // Cek session login
@@ -1075,7 +1075,7 @@
         if (stored) {
             currentUser = JSON.parse(stored);
             // Pastikan user ada di demoUsers (valid)
-            const found = demoUsers.find(u => u.email === currentUser.email);
+            const found = demoUsers.find(u => u.username === currentUser.username);
             if (found) {
                 updateUIForUser();
                 document.getElementById('loginModal').style.display = 'none';
@@ -1084,12 +1084,13 @@
         }
         // Tampilkan modal login
         document.getElementById('loginModal').style.display = 'flex';
+        // Sembunyikan konten utama? Tidak perlu, karena modal menutupi
     }
 
     function handleLogin() {
-        const email = document.getElementById('loginEmail').value.trim();
+        const username = document.getElementById('loginUsername').value.trim();
         const password = document.getElementById('loginPassword').value.trim();
-        const user = demoUsers.find(u => u.email === email && u.password === password);
+        const user = demoUsers.find(u => u.username === username && u.password === password);
         if (user) {
             currentUser = { ...user }; // simpan tanpa password
             delete currentUser.password;
@@ -1097,7 +1098,7 @@
             updateUIForUser();
             document.getElementById('loginModal').style.display = 'none';
         } else {
-            alert('Email atau password salah!');
+            alert('Username atau password salah!');
         }
     }
 
@@ -1105,7 +1106,9 @@
         localStorage.removeItem('pdms_current_user');
         currentUser = null;
         document.getElementById('loginModal').style.display = 'flex';
-        // Reset tampilan
+        // Reset tampilan ke default (Admin?)
+        // Tapi karena sudah logout, sebaiknya sembunyikan menu yang sensitif
+        // Untuk sederhana, kita reload halaman
         window.location.reload(); 
     }
 
@@ -1126,7 +1129,8 @@
         }
 
         // Atur currentRole untuk Laci Editor
-        currentRole = currentUser.role;
+        currentRole = currentUser.role; // variabel global di script
+        // Jika diperlukan, update tampilan di laci editor
     }
 
     // ==================== DATA MASTER ====================
@@ -1704,6 +1708,8 @@
     });
 
     // ==================== PROFILE ====================
+    // (currentUser sudah didefinisikan)
+
     function loadProfile() {
         if (currentUser) {
             document.getElementById('profileName').value = currentUser.name;
@@ -1728,6 +1734,7 @@
     }
 
     function changePassword() {
+        // Untuk demo, password tidak diubah
         alert('Fungsi ganti password tidak diimplementasikan di demo.');
     }
 
@@ -1880,4 +1887,4 @@
 </script>
 </body>
 </html>
-```
+User name menggunakan email saat login
